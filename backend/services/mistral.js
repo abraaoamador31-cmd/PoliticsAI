@@ -99,7 +99,7 @@ async function generateSection(politician, section, lang = "pt") {
     model: "mistral-large-latest",
     messages: [{ role: "user", content: promptText }],
     temperature: 0.3,
-    maxTokens: 900,
+    maxTokens: 1500,
   });
 
   const text = result.choices[0].message.content;
