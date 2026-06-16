@@ -24,6 +24,8 @@ app.use("/api/", rateLimit({
 
 app.use("/api/politicians", require("./routes/politicians"));
 app.use("/api/search", require("./routes/search"));
+app.use("/api/auth",        require("./routes/auth"));
+app.use("/webhook",         require("./routes/webhook"));
 
 app.get("/health", async (req, res) => {
   try {

@@ -104,6 +104,26 @@ async function migrate() {
       CREATE INDEX IF NOT EXISTS idx_legal_records_status ON legal_records(status);
     `);
 
+// ── Users ─────────────────────────────────────────────────────────────
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id                   SERIAL PRIMARY KEY,
+        email                TEXT UNIQUE NOT NULL,
+        password_hash        TEXT,
+        name                 TEXT,
+        is_pro               BOOLEAN DEFAULT false,
+        pro_since            TIMESTAMPTZ,
+        searches_this_month  INT DEFAULT 0,
+        last_search_reset    TIMESTAMPTZ DEFAULT NOW(),
+        created_at           TIMESTAMPTZ DEFAULT NOW(),
+        updated_at           TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+    `);
+
     await client.query("COMMIT");
     console.log("✅ Migration done!");
   } catch (err) {
