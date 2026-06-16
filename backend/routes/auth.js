@@ -75,4 +75,21 @@ router.get("/me/:userId", async (req, res) => {
   }
 });
 
+// ── POST /api/auth/search/:userId ─────────────────────────────────────────
+router.post("/search/:userId", async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `UPDATE users 
+       SET searches_this_month = searches_this_month + 1
+       WHERE id = $1
+       RETURNING id, searches_this_month, is_pro`,
+      [req.params.userId]
+    );
+    if (!rows[0]) return res.status(404).json({ error: "Usuario nao encontrado" });
+    res.json({ data: rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

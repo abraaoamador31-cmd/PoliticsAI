@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { api } from "./api";
+import { useAuth } from "./AuthContext";
+import Login from "./Login";
+import Register from "./Register";
 
 const SECTIONS = [
   { key: "carreira",       label: { pt: "Carreira",       en: "Career"        }, icon: "[+]" },
@@ -102,6 +105,9 @@ export default function App() {
   const [typing, setTyping]               = useState(false);
   const debouncedQuery = useDebounce(query, 280);
   const t = UI_TEXT[lang];
+  const { user, logout, canSearch, searchesLeft, updateSearchCount } = useAuth();
+  const [showLogin, setShowLogin] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
 
   useEffect(() => {
     api.getTrending().then(r => setTrending(r.data || [])).catch(() => {});
@@ -123,6 +129,13 @@ export default function App() {
   const loadSectionFor = useCallback(async (pol, section) => {
     const cacheKey = section + "_" + lang;
     if (sectionCache[cacheKey]) { setActiveSection(section); return; }
+    if (!user) { setShowLogin(true); return; }
+    if (!canSearch()) {
+      setError(lang === "pt"
+        ? "Voce usou suas 3 buscas gratuitas este mes. Assine o plano Pro para acesso ilimitado!"
+        : "You used your 3 free searches this month. Subscribe to Pro for unlimited access!");
+      return;
+    }
     setLoadingSection(true);
     setActiveSection(section);
     setError(null);
@@ -166,6 +179,31 @@ return (
           <div className="header-eyebrow">{t.eyebrow}</div>
           <h1>{t.title}<em>{t.titleAccent}</em></h1>
           <p className="header-sub">{t.subtitle}</p>
+<div className="user-bar">
+            {user ? (
+              <>
+                <span className="user-name">Ola, {user.name}</span>
+                {!user.is_pro && (
+                  <span className="searches-left">
+                    {searchesLeft()} {lang === "pt" ? "buscas restantes" : "searches left"}
+                  </span>
+                )}
+                {user.is_pro && <span className="pro-badge">PRO</span>}
+                <button className="logout-btn" onClick={logout}>
+                  {lang === "pt" ? "Sair" : "Logout"}
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="login-btn" onClick={() => setShowLogin(true)}>
+                  {lang === "pt" ? "Entrar" : "Login"}
+                </button>
+                <button className="register-btn" onClick={() => setShowRegister(true)}>
+                  {lang === "pt" ? "Cadastrar gratis" : "Sign up free"}
+                </button>
+              </>
+            )}
+          </div>
 
           <div className="lang-toggle">
             <button className={"lang-btn" + (lang === "pt" ? " active" : "")} onClick={() => setLang("pt")}>BR PT</button>
@@ -357,6 +395,18 @@ return (
         )}
 
         <footer className="footer">{t.disclaimer}</footer>
+        {showLogin && (
+          <Login
+            onSwitchToRegister={() => { setShowLogin(false); setShowRegister(true); }}
+            onSuccess={() => setShowLogin(false)}
+          />
+        )}
+        {showRegister && (
+          <Register
+            onSwitchToLogin={() => { setShowRegister(false); setShowLogin(true); }}
+            onSuccess={() => setShowRegister(false)}
+          />
+        )}
       </div>
     </>
   );

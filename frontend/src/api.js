@@ -39,4 +39,21 @@ export const api = {
         session_id: sessionStorage.getItem("sid") || Math.random().toString(36).slice(2),
       }),
     }).catch(() => {}),
+
+    login: (email, password) =>
+    request("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    }),
+
+  register: (name, email, password) =>
+    request("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ name, email, password }),
+    }),
+
+  incrementSearch: (userId) =>
+    request(`/api/auth/search/${userId}`, {
+      method: "POST",
+    }),
 };
