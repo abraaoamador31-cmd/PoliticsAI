@@ -33,11 +33,19 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     try {
-      const cookie = getCookie();
       const local = localStorage.getItem(KEY);
-      const saved = cookie || local;
-      if (saved) setUser(JSON.parse(saved));
-    } catch (_) {}
+      const cookie = getCookie();
+      const saved = local || cookie;
+      console.log("Auth check - local:", local);
+      console.log("Auth check - cookie:", cookie);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        console.log("Auth check - parsed:", parsed);
+        setUser(parsed);
+      }
+    } catch (err) {
+      console.error("Auth error:", err);
+    }
     setLoading(false);
   }, []);
 
