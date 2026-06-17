@@ -108,6 +108,7 @@ export default function App() {
   const { user, logout, canSearch, searchesLeft, updateSearchCount } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
   useEffect(() => {
     api.getTrending().then(r => setTrending(r.data || [])).catch(() => {});
@@ -132,8 +133,9 @@ export default function App() {
     if (!user) { setShowLogin(true); return; }
     if (!canSearch()) {
       setError(lang === "pt"
-        ? "Voce usou suas 3 buscas gratuitas este mes. Assine o plano Pro para acesso ilimitado!"
-        : "You used your 3 free searches this month. Subscribe to Pro for unlimited access!");
+        ? "Voce usou suas 3 buscas gratuitas este mes. Clique em ASSINAR PRO para acesso ilimitado!"
+        : "You used your 3 free searches this month. Click SUBSCRIBE PRO for unlimited access!");
+      setShowUpgrade(true);
       return;
     }
     setLoadingSection(true);
@@ -395,6 +397,31 @@ return (
         )}
 
         <footer className="footer">{t.disclaimer}</footer>
+        {showUpgrade && (
+          <div style={{position:"fixed",inset:0,background:"rgba(5,8,15,0.95)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,fontFamily:"'JetBrains Mono',monospace"}}>
+            <div style={{background:"#0d1117",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:"2.5rem",width:"100%",maxWidth:400,display:"flex",flexDirection:"column",gap:"1rem",textAlign:"center"}}>
+              <div style={{fontSize:"2rem"}}>🔒</div>
+              <h2 style={{fontFamily:"'DM Serif Display',serif",color:"#fff",margin:0}}>
+                Limite atingido
+              </h2>
+              <p style={{color:"#4a5568",fontSize:"0.75rem",margin:0}}>
+                Voce usou suas 3 buscas gratuitas deste mes.
+              </p>
+              <div style={{background:"rgba(240,180,41,0.05)",border:"1px solid rgba(240,180,41,0.2)",borderRadius:8,padding:"1rem"}}>
+                <p style={{color:"#f0b429",fontSize:"0.8rem",fontWeight:"bold",margin:"0 0 0.5rem"}}>Plano Pro — R$ 19,99/mes</p>
+                <p style={{color:"#4a5568",fontSize:"0.7rem",margin:0}}>Buscas ilimitadas + todos os paises</p>
+              </div>
+              <a href="https://pay.hotmart.com/R106351026S" target="_blank" rel="noopener noreferrer"
+                style={{background:"linear-gradient(135deg,#f0b429,#ff6b35)",border:"none",borderRadius:8,padding:"0.9rem",color:"#000",fontWeight:700,fontSize:"0.9rem",cursor:"pointer",textDecoration:"none",display:"block"}}>
+                Assinar Pro agora
+              </a>
+              <button onClick={() => setShowUpgrade(false)}
+                style={{background:"transparent",border:"1px solid rgba(255,255,255,0.08)",borderRadius:8,padding:"0.6rem",color:"#4a5568",fontSize:"0.75rem",cursor:"pointer"}}>
+                Fechar
+              </button>
+            </div>
+          </div>
+        )}
         {showLogin && (
           <Login
             onSwitchToRegister={() => { setShowLogin(false); setShowRegister(true); }}
@@ -517,6 +544,13 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-mono);
 .empty-hero-icon { font-size: 2rem; margin-bottom: 1rem; opacity: 0.3; }
 .empty-hero h3 { font-family: var(--font-display); font-size: 1.6rem; color: var(--muted); margin-bottom: 0.75rem; }
 .empty-hero p { font-size: 0.75rem; color: var(--muted); opacity: 0.6; line-height: 1.8; }
+.user-bar { display: flex; align-items: center; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1rem; }
+.user-name { font-size: 0.72rem; color: #dce6f0; }
+.searches-left { font-size: 0.65rem; color: #f0b429; background: rgba(240,180,41,0.1); border: 1px solid rgba(240,180,41,0.2); padding: 0.2rem 0.6rem; border-radius: 99px; }
+.pro-badge { font-size: 0.65rem; color: #00d97e; background: rgba(0,217,126,0.1); border: 1px solid rgba(0,217,126,0.2); padding: 0.2rem 0.6rem; border-radius: 99px; letter-spacing: 0.1em; }
+.logout-btn { padding: 0.25rem 0.75rem; background: rgba(255,92,92,0.1); border: 1px solid rgba(255,92,92,0.2); border-radius: 6px; color: #ff5c5c; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; cursor: pointer; }
+.login-btn { padding: 0.3rem 0.85rem; background: rgba(79,142,247,0.1); border: 1px solid rgba(79,142,247,0.25); border-radius: 99px; color: #4f8ef7; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; cursor: pointer; }
+.register-btn { padding: 0.3rem 0.85rem; background: linear-gradient(135deg, #f0b429, #ff6b35); border: none; border-radius: 99px; color：#000; font-family: 'JetBrains Mono', monospace; font-size：#ff6b35; font-weight：700; cursor：pointer; }
 .footer { text-align: center; padding: 2rem; font-size: 0.62rem; color: var(--muted); opacity: 0.5; position: relative; z-index: 5; }
 .cursor { display: inline-block; width: 7px; height: 13px; background: var(--amber); margin-left: 2px; vertical-align: middle; animation: blink2 1s step-end infinite; border-radius: 1px; }
 @keyframes blink2 { 0%,100%{opacity:1} 50%{opacity:0} }
