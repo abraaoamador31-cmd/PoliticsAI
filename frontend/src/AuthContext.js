@@ -3,25 +3,33 @@ import { api } from "./api";
 
 const AuthContext = createContext(null);
 
+const STORAGE_KEY = "politicsai_user";
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const saved = localStorage.getItem("politicsai_user");
-    if (saved) {
-      try {
-        setUser(JSON.parse(saved));
-      } catch (_) {}
-    }
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY) || sessionStorage.getItem(STORAGE_KEY);
+      if (saved) setUser(JSON.parse(saved));
+    } catch (_) {}
     setLoading(false);
   }, []);
+
+  const saveUser = (userData) => {
+    try {
+      const str = JSON.stringify(userData);
+      localStorage.setItem(STORAGE_KEY, str);
+      sessionStorage.setItem(STORAGE_KEY, str);
+    } catch (_) {}
+  };
 
   const login = async (email, password) => {
     const res = await api.login(email, password);
     const userData = res.data;
     setUser(userData);
-    localStorage.setItem("politicsai_user", JSON.stringify(userData));
+    saveUser(userData);
     return userData;
   };
 
@@ -32,14 +40,17 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("politicsai_user");
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(STORAGE_KEY);
+    } catch (_) {}
   };
 
   const updateSearchCount = () => {
     if (!user) return;
     const updated = { ...user, searches_this_month: (user.searches_this_month || 0) + 1 };
     setUser(updated);
-    localStorage.setItem("politicsai_user", JSON.stringify(updated));
+    saveUser(updated);
   };
 
   const canSearch = () => {
