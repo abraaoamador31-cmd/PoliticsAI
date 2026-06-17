@@ -105,7 +105,7 @@ export default function App() {
   const [typing, setTyping]               = useState(false);
   const debouncedQuery = useDebounce(query, 280);
   const t = UI_TEXT[lang];
-  const { user, logout, canSearch, searchesLeft, updateSearchCount } = useAuth();
+  const { user, loading, logout, canSearch, searchesLeft, updateSearchCount } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
@@ -173,6 +173,7 @@ export default function App() {
 
   const cacheKey = activeSection + "_" + lang;
   const current = sectionCache[cacheKey];
+  if (loading) return null;
 return (
     <>
       <style>{CSS}</style>
