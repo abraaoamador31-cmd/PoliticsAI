@@ -145,6 +145,8 @@ export default function App() {
     try {
       const res = await api.getSection(pol.slug, section, lang);
       setSectionCache(prev => ({ ...prev, [cacheKey]: res.data }));
+      updateSearchCount();
+      if (user) api.incrementSearch(user.id).catch(() => {});
       setTyping(true);
     } catch (err) {
       setError(err.message);
