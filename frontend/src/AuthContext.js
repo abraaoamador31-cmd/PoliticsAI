@@ -2,8 +2,22 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { api } from "./api";
 
 const AuthContext = createContext(null);
+const KEY = "politicsai_user";
 
-const STORAGE_KEY = "politicsai_user";
+function setCookie(value) {
+  const expires = new Date();
+  expires.setDate(expires.getDate() + 30);
+  document.cookie = `${KEY}=${encodeURIComponent(value)};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+}
+
+function getCookie() {
+  const match = document.cookie.match(new RegExp(`(^| )${KEY}=([^;]+)`));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
+function deleteCookie() {
+  document.cookie = `${KEY}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`;
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -11,7 +25,9 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY) || sessionStorage.getItem(STORAGE_KEY);
+      const cookie = getCookie();
+      const local = localStorage.getItem(KEY);
+      const saved = cookie || local;
       if (saved) setUser(JSON.parse(saved));
     } catch (_) {}
     setLoading(false);
@@ -20,8 +36,9 @@ export function AuthProvider({ children }) {
   const saveUser = (userData) => {
     try {
       const str = JSON.stringify(userData);
-      localStorage.setItem(STORAGE_KEY, str);
-      sessionStorage.setItem(STORAGE_KEY, str);
+      setCookie(str);
+      localStorage.setItem(KEY, str);
+      sessionStorage.setItem(KEY, str);
     } catch (_) {}
   };
 
@@ -41,8 +58,9 @@ export function AuthProvider({ children }) {
   const logout = () => {
     setUser(null);
     try {
-      localStorage.removeItem(STORAGE_KEY);
-      sessionStorage.removeItem(STORAGE_KEY);
+      deleteCookie();
+      localStorage.removeItem(KEY);
+      sessionStorage.removeItem(KEY);
     } catch (_) {}
   };
 
