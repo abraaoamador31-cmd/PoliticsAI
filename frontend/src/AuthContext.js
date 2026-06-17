@@ -11,8 +11,16 @@ function setCookie(value) {
 }
 
 function getCookie() {
-  const match = document.cookie.match(new RegExp(`(^| )${KEY}=([^;]+)`));
-  return match ? decodeURIComponent(match[2]) : null;
+  try {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+      const [name, ...rest] = cookie.trim().split('=');
+      if (name === KEY) {
+        return decodeURIComponent(rest.join('='));
+      }
+    }
+  } catch (_) {}
+  return null;
 }
 
 function deleteCookie() {
